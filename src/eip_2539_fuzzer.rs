@@ -9,9 +9,11 @@ use eth_pairings::engines::bls12_377;
 use eth_pairings::public_interface::{decode_fp, decode_g1, decode_g2};
 use eth_pairings::traits::*;
 use eth_pairings::square_root::*;
-use eth_pairings::public_interface::eip2537::EIP2537Executor;
+use eth_pairings::public_interface::eip2539::EIP2539Executor;
 use eth_pairings_go_2539::*;
 use std::fmt::Write;
+
+const MODULUS_DECIMAL: &str = "258664426012969094010652733694893533536393512754914660539884262666720468348340822774968888139573360124440321458177";
 
 pub struct GenerationContext<R: Rng> {
     pub scalar_generation_fn: Box<dyn Fn(&mut Mutator<R>, ScalarGenerationFlags) -> Vec<u8> + Send + Sync + 'static>,
@@ -44,7 +46,7 @@ impl<R: Rng> GenerationContext<R> {
             }
         };
 
-        let modulus = BigUint::from_str_radix("4002409555221667393417789825735904156556882819939007885332058136124031650490837864442687629129015664037894272559787", 10).unwrap();
+        let modulus = BigUint::from_str_radix(MODULUS_DECIMAL, 10).unwrap();
 
         let m = modulus.clone();
         let fp_generation_fn = move |mutator: &mut Mutator<R>, flags: FieldGenerationFlags| {
@@ -283,7 +285,7 @@ pub enum EcPointGenerationFlag {
 
 #[derive(Derivative)]
 #[derivative(Clone, Debug, Default)]
-pub struct EIP2537Generator<R: Rng> {
+pub struct EIP2539Generator<R: Rng> {
     #[derivative(Debug="ignore")]
     marker: std::marker::PhantomData<R>
 }
@@ -380,7 +382,7 @@ pub fn create_runners<R: Rng>(verbose_errors: bool, verbose_results: bool) -> Ve
     };
 
     let g1_add_run_fn = move |input: &[u8]| {
-        let rust_result = map_err_to_string("Rust", EIP2537Executor::g1_add(input).map(|el| el.to_vec()));
+        let rust_result = map_err_to_string("Rust", EIP2539Executor::g1_add(input).map(|el| el.to_vec()));
         let go_result = map_err_to_string("Go",perform_operation(OperationType::G1ADD, &input));
 
         vec![rust_result, go_result]
@@ -399,7 +401,7 @@ pub fn create_runners<R: Rng>(verbose_errors: bool, verbose_results: bool) -> Ve
     };
 
     let g1_mul_run_fn = move |input: &[u8]| {
-        let rust_result = map_err_to_string("Rust", EIP2537Executor::g1_mul(input).map(|el| el.to_vec()));
+        let rust_result = map_err_to_string("Rust", EIP2539Executor::g1_mul(input).map(|el| el.to_vec()));
         let go_result = map_err_to_string("Go",perform_operation(OperationType::G1MUL, &input));
 
         vec![rust_result, go_result]
@@ -418,7 +420,7 @@ pub fn create_runners<R: Rng>(verbose_errors: bool, verbose_results: bool) -> Ve
     };
 
     let g1_multiexp_run_fn = move |input: &[u8]| {
-        let rust_result = map_err_to_string("Rust", EIP2537Executor::g1_multiexp(input).map(|el| el.to_vec()));
+        let rust_result = map_err_to_string("Rust", EIP2539Executor::g1_multiexp(input).map(|el| el.to_vec()));
         let go_result = map_err_to_string("Go",perform_operation(OperationType::G1MULTIEXP, &input));
 
         vec![rust_result, go_result]
@@ -437,7 +439,7 @@ pub fn create_runners<R: Rng>(verbose_errors: bool, verbose_results: bool) -> Ve
     };
 
     let g2_add_run_fn = move |input: &[u8]| {
-        let rust_result = map_err_to_string("Rust", EIP2537Executor::g2_add(input).map(|el| el.to_vec()));
+        let rust_result = map_err_to_string("Rust", EIP2539Executor::g2_add(input).map(|el| el.to_vec()));
         let go_result = map_err_to_string("Go",perform_operation(OperationType::G2ADD, &input));
 
         vec![rust_result, go_result]
@@ -456,7 +458,7 @@ pub fn create_runners<R: Rng>(verbose_errors: bool, verbose_results: bool) -> Ve
     };
 
     let g2_mul_run_fn = move |input: &[u8]| {
-        let rust_result = map_err_to_string("Rust", EIP2537Executor::g2_mul(input).map(|el| el.to_vec()));
+        let rust_result = map_err_to_string("Rust", EIP2539Executor::g2_mul(input).map(|el| el.to_vec()));
         let go_result = map_err_to_string("Go",perform_operation(OperationType::G2MUL, &input));
 
         vec![rust_result, go_result]
@@ -475,7 +477,7 @@ pub fn create_runners<R: Rng>(verbose_errors: bool, verbose_results: bool) -> Ve
     };
 
     let g2_multiexp_run_fn = move |input: &[u8]| {
-        let rust_result = map_err_to_string("Rust", EIP2537Executor::g2_multiexp(input).map(|el| el.to_vec()));
+        let rust_result = map_err_to_string("Rust", EIP2539Executor::g2_multiexp(input).map(|el| el.to_vec()));
         let go_result = map_err_to_string("Go",perform_operation(OperationType::G2MULTIEXP, &input));
 
         vec![rust_result, go_result]
@@ -494,7 +496,7 @@ pub fn create_runners<R: Rng>(verbose_errors: bool, verbose_results: bool) -> Ve
     };
 
     let pairing_run_fn = move |input: &[u8]| {
-        let rust_result = map_err_to_string("Rust", EIP2537Executor::pair(input).map(|el| el.to_vec()));
+        let rust_result = map_err_to_string("Rust", EIP2539Executor::pair(input).map(|el| el.to_vec()));
         let go_result = map_err_to_string("Go",perform_operation(OperationType::PAIR, &input));
 
         vec![rust_result, go_result]
@@ -797,7 +799,7 @@ fn make_random_scalar_with_encoding<R: Rng>(rng: &mut R) -> (Scalar, Vec<u8>) {
 }
 
 fn make_g1_in_invalid_subgroup<R: Rng>(rng: &mut R) -> Vec<u8> {
-    let modulus = BigUint::from_str_radix("4002409555221667393417789825735904156556882819939007885332058136124031650490837864442687629129015664037894272559787", 10).unwrap();
+    let modulus = BigUint::from_str_radix(MODULUS_DECIMAL, 10).unwrap();
     let (fp, _) = make_random_fp_with_encoding(rng, &modulus);
     let one = FpElement::one(&bls12_377::BLS12_377_FIELD);
 
@@ -829,7 +831,7 @@ fn make_g1_in_invalid_subgroup<R: Rng>(rng: &mut R) -> Vec<u8> {
 }  
 
 fn make_g2_in_invalid_subgroup<R: Rng>(rng: &mut R) -> Vec<u8> {
-    let modulus = BigUint::from_str_radix("4002409555221667393417789825735904156556882819939007885332058136124031650490837864442687629129015664037894272559787", 10).unwrap();
+    let modulus = BigUint::from_str_radix(MODULUS_DECIMAL, 10).unwrap();
     let (fp, _) = make_random_fp2_with_encoding(rng, &modulus);
     let one = Fp2Element::one(&bls12_377::BLS12_377_EXTENSION_2_FIELD);
 
