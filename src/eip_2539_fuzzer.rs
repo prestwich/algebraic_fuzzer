@@ -125,9 +125,9 @@ impl<R: Rng> GenerationContext<R> {
 
                     encoding
                 },
-                EcPointGenerationFlag::CreateInvalidSubgroup => {
-                    make_g1_in_invalid_subgroup(mutator.rng_mut())
-                },
+                // EcPointGenerationFlag::CreateInvalidSubgroup => {
+                //     make_g1_in_invalid_subgroup(mutator.rng_mut())
+                // },
                 EcPointGenerationFlag::CreateOtherInvalidEncoding => {
                     let mut input = vec![];
                     input.extend(make_invalid_encoding_fp(mutator.rng_mut(), &m, false));
@@ -168,9 +168,9 @@ impl<R: Rng> GenerationContext<R> {
 
                     encoding
                 },
-                EcPointGenerationFlag::CreateInvalidSubgroup => {
-                    make_g2_in_invalid_subgroup(mutator.rng_mut())
-                },
+                // EcPointGenerationFlag::CreateInvalidSubgroup => {
+                //     make_g2_in_invalid_subgroup(mutator.rng_mut())
+                // },
                 EcPointGenerationFlag::CreateOtherInvalidEncoding => {
                     let mut input = vec![];
                     input.extend(make_invalid_encoding_fp2(mutator.rng_mut(), &m, false));
@@ -278,7 +278,7 @@ pub enum EcPointGenerationFlag {
     CreateInfinity,
     CreateValid,
     CreateNotOnCurve,
-    CreateInvalidSubgroup,
+    // CreateInvalidSubgroup,
     CreateOtherInvalidEncoding,
     CreateInvalidLength
 }
