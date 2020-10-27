@@ -863,7 +863,7 @@ fn make_g1_in_invalid_subgroup<R: Rng>(rng: &mut R) -> Vec<u8> {
 
         let leg = legendre_symbol_fp(&rhs);
         if leg == LegendreSymbol::QuadraticResidue {
-            let y = sqrt(&rhs).unwrap();
+            let y = sqrt(&rhs, None).unwrap();
             let point = G1::point_from_xy(&bls12_381::BLS12_381_G1_CURVE, fp_candidate.clone(), y);
 
             if point.wnaf_mul_with_window_size(&bls12_381::BLS12_381_SUBGROUP_ORDER[..], 5).is_zero() == false {
@@ -894,7 +894,7 @@ fn make_g2_in_invalid_subgroup<R: Rng>(rng: &mut R) -> Vec<u8> {
 
         let leg = legendre_symbol_fp2(&rhs);
         if leg == LegendreSymbol::QuadraticResidue {
-            let y = sqrt_ext2(&rhs).unwrap();
+            let y = sqrt_ext2(&rhs, None).unwrap();
             let point = G2::point_from_xy(&bls12_381::BLS12_381_G2_CURVE, fp_candidate.clone(), y);
 
             if point.wnaf_mul_with_window_size(&bls12_381::BLS12_381_SUBGROUP_ORDER[..], 5).is_zero() == false {

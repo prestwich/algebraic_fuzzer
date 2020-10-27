@@ -125,9 +125,9 @@ impl<R: Rng> GenerationContext<R> {
 
                     encoding
                 },
-                // EcPointGenerationFlag::CreateInvalidSubgroup => {
-                //     make_g1_in_invalid_subgroup(mutator.rng_mut())
-                // },
+                EcPointGenerationFlag::CreateInvalidSubgroup => {
+                    make_g1_in_invalid_subgroup(mutator.rng_mut())
+                },
                 EcPointGenerationFlag::CreateOtherInvalidEncoding => {
                     let mut input = vec![];
                     input.extend(make_invalid_encoding_fp(mutator.rng_mut(), &m, false));
@@ -168,9 +168,9 @@ impl<R: Rng> GenerationContext<R> {
 
                     encoding
                 },
-                // EcPointGenerationFlag::CreateInvalidSubgroup => {
-                //     make_g2_in_invalid_subgroup(mutator.rng_mut())
-                // },
+                EcPointGenerationFlag::CreateInvalidSubgroup => {
+                    make_g2_in_invalid_subgroup(mutator.rng_mut())
+                },
                 EcPointGenerationFlag::CreateOtherInvalidEncoding => {
                     let mut input = vec![];
                     input.extend(make_invalid_encoding_fp2(mutator.rng_mut(), &m, false));
@@ -278,7 +278,7 @@ pub enum EcPointGenerationFlag {
     CreateInfinity,
     CreateValid,
     CreateNotOnCurve,
-    // CreateInvalidSubgroup,
+    CreateInvalidSubgroup,
     CreateOtherInvalidEncoding,
     CreateInvalidLength
 }
@@ -815,7 +815,7 @@ fn make_g1_in_invalid_subgroup<R: Rng>(rng: &mut R) -> Vec<u8> {
 
         let leg = legendre_symbol_fp(&rhs);
         if leg == LegendreSymbol::QuadraticResidue {
-            let y = sqrt(&rhs).unwrap();
+            let y = sqrt(&rhs, Some(bls12_377::BLS12_377_FQ_SQRT_CONTEXT)).unwrap();
             let point = G1::point_from_xy(&bls12_377::BLS12_377_G1_CURVE, fp_candidate.clone(), y);
 
             if point.wnaf_mul_with_window_size(&bls12_377::BLS12_377_SUBGROUP_ORDER[..], 5).is_zero() == false {
@@ -846,7 +846,7 @@ fn make_g2_in_invalid_subgroup<R: Rng>(rng: &mut R) -> Vec<u8> {
 
         let leg = legendre_symbol_fp2(&rhs);
         if leg == LegendreSymbol::QuadraticResidue {
-            let y = sqrt_ext2(&rhs).unwrap();
+            let y = sqrt_ext2(&rhs, Some(bls12_377::BLS12_377_FQ_SQRT_CONTEXT)).unwrap();
             let point = G2::point_from_xy(&bls12_377::BLS12_377_G2_CURVE, fp_candidate.clone(), y);
 
             if point.wnaf_mul_with_window_size(&bls12_377::BLS12_377_SUBGROUP_ORDER[..], 5).is_zero() == false {
